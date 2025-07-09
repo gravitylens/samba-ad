@@ -11,9 +11,9 @@ services:
       TZ: ${SAMBA_TIMEZONE}
       DOMAIN: ${SAMBA_DOMAIN}
       REALM: ${SAMBA_REALM}
-      DOMAINPASS: ${SAMBA_DOMAINPASS}
       ADMIN_PASSWORD: ${SAMBA_ADMIN_PASSWORD}
       DNS_FORWARDER: ${SAMBA_DNS_FORWARDER}
+      HOST_IP: ${SAMBA_IPV4_ADDRESS}
     volumes:
       - ./samba/config:/etc/samba
       - ./samba/data:/var/lib/samba
