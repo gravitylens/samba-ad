@@ -3,6 +3,7 @@ version: '3.8'
 services:
   samba-ad:
     build: .
+    user: root
     container_name: samba-ad
     hostname: ${SAMBA_HOSTNAME}
     domainname: ${SAMBA_DOMAINNAME}
