@@ -19,6 +19,8 @@ services:
       - ./samba/data:/var/lib/samba
       - samba_cache:/var/cache/samba
       - samba_logs:/var/log/samba
+      - samba_sysvol:/var/lib/samba/sysvol
+      - samba_netlogon:/var/lib/samba/netlogon
     networks:
       samba_macvlan:
         ipv4_address: ${SAMBA_IPV4_ADDRESS}
@@ -26,6 +28,8 @@ services:
 volumes:
   samba_cache:
   samba_logs:
+  samba_sysvol:
+  samba_netlogon:
 
 networks:
   samba_macvlan:
