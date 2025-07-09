@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Read environment variables
 REALM="${REALM:-EXAMPLE.LOCAL}"
@@ -6,6 +7,8 @@ DOMAIN="${DOMAIN:-EXAMPLE}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-StrongP@ssw0rd!}"
 SERVER_ROLE="${SERVER_ROLE:-dc}"
 DNS_FORWARDER="${DNS_FORWARDER:-}"
+HOST_IP="${HOST_IP:-$(hostname -I | awk '{print $1}') }"
+HOST_NAME="${HOSTNAME%%.*}"
 
 echo "Samba AD Container Starting"
 echo "  Domain:  $DOMAIN"
@@ -29,8 +32,10 @@ if [ ! -f /var/lib/samba/private/secrets.ldb ]; then
 		--realm="$REALM" \
 		--domain="$DOMAIN" \
 		--adminpass="$ADMIN_PASSWORD" \
-		--server-role="$SERVER_ROLE" \
-		--dns-backend=SAMBA_INTERNAL \
+                --server-role="$SERVER_ROLE" \
+                --host-name="$HOST_NAME" \
+                --host-ip="$HOST_IP" \
+                --dns-backend=SAMBA_INTERNAL \
 		${DNS_FORWARDER:+--option="dns forwarder = $DNS_FORWARDER"}; then
 		echo "❌ Failed to provision domain"
 		exit 1
