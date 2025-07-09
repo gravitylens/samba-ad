@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  samba-ad:
+    build: .
+    container_name: samba-ad
+    hostname: ${SAMBA_HOSTNAME}
+    domainname: ${SAMBA_DOMAINNAME}
+    restart: unless-stopped
+    environment:
+      TZ: ${SAMBA_TIMEZONE}
+      DOMAIN: ${SAMBA_DOMAIN}
+      REALM: ${SAMBA_REALM}
+      DOMAINPASS: ${SAMBA_DOMAINPASS}
+      ADMIN_PASSWORD: ${SAMBA_ADMIN_PASSWORD}
+      DNS_FORWARDER: ${SAMBA_DNS_FORWARDER}
+    volumes:
+      - ./samba/config:/etc/samba
+      - ./samba/data:/var/lib/samba
+      - samba_cache:/var/cache/samba
+      - samba_logs:/var/log/samba
+    networks:
+      samba_macvlan:
+        ipv4_address: ${SAMBA_IPV4_ADDRESS}
+
+volumes:
+  samba_cache:
+  samba_logs:
+
+networks:
+  samba_macvlan:
+    external: true
