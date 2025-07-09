@@ -15,10 +15,6 @@ services:
       DNS_FORWARDER: ${SAMBA_DNS_FORWARDER}
       HOST_IP: ${SAMBA_IPV4_ADDRESS}
     volumes:
-      - ./samba/config:/etc/samba
-      - ./samba/data:/var/lib/samba
-      - samba_cache:/var/cache/samba
-      - samba_logs:/var/log/samba
       - samba_sysvol:/var/lib/samba/sysvol
       - samba_netlogon:/var/lib/samba/netlogon
     networks:
@@ -26,8 +22,7 @@ services:
         ipv4_address: ${SAMBA_IPV4_ADDRESS}
 
 volumes:
-  samba_cache:
-  samba_logs:
+
   samba_sysvol:
   samba_netlogon:
 
