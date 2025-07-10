@@ -1,9 +1,8 @@
-version: '3.8'
-
 services:
   samba-ad:
     build: .
-    user: root
+    user: "0:0"
+    privileged: true
     container_name: samba-ad
     hostname: ${SAMBA_HOSTNAME}
     domainname: ${SAMBA_DOMAINNAME}
@@ -26,10 +25,12 @@ services:
     networks:
       samba_macvlan:
         ipv4_address: ${SAMBA_IPV4_ADDRESS}
+    dns:
+      - 127.0.0.1
 
 volumes:
   samba_cache:
-  samba_logs
+  samba_logs:
   samba_sysvol:
   samba_netlogon:
 
