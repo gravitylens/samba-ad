@@ -14,6 +14,7 @@ services:
       ADMIN_PASSWORD: ${SAMBA_ADMIN_PASSWORD}
       DNS_FORWARDER: ${SAMBA_DNS_FORWARDER}
       HOST_IP: ${SAMBA_IPV4_ADDRESS}
+      SERVER_ROLE: active directory domain controller
     volumes:
       - samba_sysvol:/var/lib/samba/sysvol
       - samba_netlogon:/var/lib/samba/netlogon
