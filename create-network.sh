@@ -58,10 +58,19 @@ if [ -z "$GATEWAY" ]; then
 fi
 
 # Check if the IP is already in use
+
 if ping -c 1 -W 1 "$CONTAINER_IP" >/dev/null 2>&1; then
         echo "❌ Error: IP $CONTAINER_IP is already in use"
         exit 1
 fi
+
+# Stop any host Samba services that might occupy the required ports
+for svc in smbd nmbd winbindd; do
+        if systemctl is-active --quiet "$svc"; then
+                echo "Stopping $svc to free ports..."
+                systemctl stop "$svc"
+        fi
+done
 
 # Check if required ports are free before configuring the IP alias
 check_port() {
