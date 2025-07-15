@@ -59,25 +59,37 @@ fi
 
 # Check if the IP is already in use
 if ping -c 1 -W 1 "$CONTAINER_IP" >/dev/null 2>&1; then
-	echo "❌ Error: IP $CONTAINER_IP is already in use"
-	exit 1
+        echo "❌ Error: IP $CONTAINER_IP is already in use"
+        exit 1
 fi
 
-# Create Docker macvlan network if it doesn't already exist
-MACVLAN_NAME=samba_macvlan
-if docker network inspect "$MACVLAN_NAME" >/dev/null 2>&1; then
-	echo "Docker network '$MACVLAN_NAME' already exists."
-	exit 0
-fi
-
-echo "Creating macvlan network '$MACVLAN_NAME' on $subnet_cidr via $IFACE..."
-if docker network create -d macvlan \
-	--subnet="$subnet_cidr" \
-	--gateway="$GATEWAY" \
-	-o parent="$IFACE" \
-	"$MACVLAN_NAME"; then
-	echo "✅ Successfully created macvlan network '$MACVLAN_NAME'"
+# Configure host IP alias and persist it with a systemd service
+if ! ip addr show dev "$IFACE" | grep -q "${CONTAINER_IP}/"; then
+        echo "Adding IP alias $CONTAINER_IP/$SUBNET_MASK to $IFACE..."
+        ip addr add "$CONTAINER_IP/$SUBNET_MASK" dev "$IFACE"
 else
-	echo "❌ Failed to create macvlan network"
-	exit 1
+        echo "IP alias $CONTAINER_IP already exists on $IFACE."
 fi
+
+SERVICE_FILE=/etc/systemd/system/samba-ad-ip.service
+if [ ! -f "$SERVICE_FILE" ]; then
+        cat <<EOF >"$SERVICE_FILE"
+[Unit]
+Description=Configure Samba AD host IP alias
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ip addr add $CONTAINER_IP/$SUBNET_MASK dev $IFACE
+ExecStop=/sbin/ip addr del $CONTAINER_IP/$SUBNET_MASK dev $IFACE
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+        systemctl daemon-reload
+        systemctl enable --now samba-ad-ip.service
+fi
+
+echo "✅ Host configured with dedicated IP $CONTAINER_IP"
