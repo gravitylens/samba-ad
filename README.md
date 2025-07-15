@@ -47,3 +47,9 @@ sudo systemctl stop samba-ad-ip.service
 If the container fails to start due to port conflicts, ensure no other Samba
 services are running on the host. The `create-network.sh` script stops them
 automatically, but they may have restarted after a reboot.
+
+The script checks that required ports on the dedicated IP are free. If you see
+an error that port `53` is in use, it is often due to `systemd-resolved` binding
+DNS on `127.0.0.53`. Because this only listens on the loopback interface it will
+not conflict with the container. You can safely ignore the warning or disable
+`systemd-resolved` if necessary.

@@ -75,9 +75,21 @@ done
 # Check if required ports are free before configuring the IP alias
 check_port() {
     local port="$1" proto="$2"
-    if lsof -i "${proto}:${port}" >/dev/null 2>&1; then
-        echo "❌ Error: Port ${port}/${proto} is already in use"
-        exit 1
+
+    if command -v ss >/dev/null 2>&1; then
+        local opt="-ln"
+        [ "$proto" = "udp" ] && opt+="u" || opt+="t"
+        if ss $opt "( sport = :$port )" | awk '{print $5}' | \
+            grep -E "^(0\.0\.0\.0|${CONTAINER_IP}):$port$" >/dev/null; then
+            echo "❌ Error: Port ${port}/${proto} is already in use"
+            exit 1
+        fi
+    elif command -v lsof >/dev/null 2>&1; then
+        if lsof -nP -i ${proto}:$port 2>/dev/null | awk '{print $9}' | \
+            grep -E "^(\*|${CONTAINER_IP}):$port$" >/dev/null; then
+            echo "❌ Error: Port ${port}/${proto} is already in use"
+            exit 1
+        fi
     fi
 }
 
