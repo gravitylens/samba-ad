@@ -63,6 +63,24 @@ if ping -c 1 -W 1 "$CONTAINER_IP" >/dev/null 2>&1; then
         exit 1
 fi
 
+# Check if required ports are free before configuring the IP alias
+check_port() {
+    local port="$1" proto="$2"
+    if lsof -i "${proto}:${port}" >/dev/null 2>&1; then
+        echo "❌ Error: Port ${port}/${proto} is already in use"
+        exit 1
+    fi
+}
+
+for spec in \
+    53/tcp 53/udp 88/tcp 88/udp 135/tcp \
+    137/udp 138/udp 139/tcp 389/tcp 389/udp \
+    445/tcp 464/tcp 464/udp 636/tcp 3268/tcp 3269/tcp; do
+    port=${spec%/*}
+    proto=${spec#*/}
+    check_port "$port" "$proto"
+done
+
 # Configure host IP alias and persist it with a systemd service
 if ! ip addr show dev "$IFACE" | grep -q "${CONTAINER_IP}/"; then
         echo "Adding IP alias $CONTAINER_IP/$SUBNET_MASK to $IFACE..."
