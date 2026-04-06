@@ -1,3 +1,7 @@
+---
+aliases:
+  - samba-ad
+---
 # Samba Active Directory Container
 
 This repository contains a Docker setup for running Samba as an Active Directory Domain Controller.
